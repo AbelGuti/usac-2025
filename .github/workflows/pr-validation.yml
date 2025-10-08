@@ -197,9 +197,8 @@ jobs:
             const getEmoji = (status) => status === 'success' ? '✅' : '❌';
             
             const allPassed = terraformStatus === 'success' && testsStatus === 'success';
-            const finalEmoji = allPassed ? '🎉' : '⚠️';
             
-            const output = `## ${finalEmoji} PR Validation Summary
+            const output = `## PR Validation Summary
             
             | Check | Status |
             |-------|--------|
