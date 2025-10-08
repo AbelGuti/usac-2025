@@ -8,7 +8,7 @@
 
 Aplicación Flask containerizada desplegada en AWS ECS con Terraform y CI/CD mediante GitHub Actions.
 
-## 📋 Descripción
+## Descripción
 
 Este proyecto demuestra una arquitectura de microservicios en AWS utilizando:
 
@@ -19,7 +19,7 @@ Este proyecto demuestra una arquitectura de microservicios en AWS utilizando:
 - **Load Balancing**: Application Load Balancer (ALB)
 - **CI/CD**: GitHub Actions para despliegue automatizado
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 ```
 ┌─────────────┐
@@ -52,7 +52,7 @@ Este proyecto demuestra una arquitectura de microservicios en AWS utilizando:
 └────────┘       └────────┘
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerrequisitos
 
@@ -114,7 +114,7 @@ aws ecs update-service \
   --region us-east-1
 ```
 
-## 🔄 CI/CD con GitHub Actions
+## CI/CD con GitHub Actions
 
 El proyecto incluye **dos workflows principales** para asegurar calidad y automatizar despliegues:
 
@@ -129,11 +129,11 @@ Workflow profesional que se ejecuta en **cada PR** con validaciones automáticas
 - **pr-validation-summary**: Consolida resultados y determina si el PR puede mergearse
 
 #### Características:
-- ✅ Bloquea merge si las validaciones fallan
-- 📝 Comenta resultados automáticamente en el PR
-- 📊 Genera reportes de cobertura de tests
-- 📚 Mantiene documentación de Terraform actualizada
-- 🔒 Integración con Branch Protection Rules
+- Bloquea merge si las validaciones fallan
+- Comenta resultados automáticamente en el PR
+- Genera reportes de cobertura de tests
+- Mantiene documentación de Terraform actualizada
+- Integración con Branch Protection Rules
 
 Ver [PR_VALIDATION.md](PR_VALIDATION.md) para detalles completos.
 
@@ -185,129 +185,3 @@ Deploy workflow ejecuta:
         ↓
 Aplicación actualizada en producción
 ```
-
-## 🐛 Solución de Problemas
-
-### Error: Incompatibilidad de arquitectura (ARM vs AMD64)
-
-Si construiste la imagen localmente en Mac M-series y obtienes el error:
-
-```
-CannotPullContainerError: image Manifest does not contain descriptor matching platform 'linux/amd64'
-```
-
-**Solución**: Construir con la plataforma correcta
-
-```bash
-docker buildx build --platform linux/amd64 -t <imagen>:tag .
-```
-
-**Nota**: El pipeline de GitHub Actions construye automáticamente en `linux/amd64` (arquitectura nativa de los runners), por lo que este problema solo ocurre en builds locales desde Mac M-series.
-
-Ver [SOLUCION_BUILD_MULTIPLATFORM.md](SOLUCION_BUILD_MULTIPLATFORM.md) para más detalles.
-
-### Ver logs de la aplicación
-
-```bash
-# Ver logs en tiempo real
-aws logs tail /ecs/usac-demo-task --follow --region us-east-1
-
-# Ver estado del servicio
-aws ecs describe-services \
-  --cluster USAC-2025 \
-  --services usac-demo-service \
-  --region us-east-1
-```
-
-### Obtener URL de la aplicación
-
-```bash
-aws elbv2 describe-load-balancers \
-  --names usac-demo-alb \
-  --region us-east-1 \
-  --query 'LoadBalancers[0].DNSName' \
-  --output text
-```
-
-## 📁 Estructura del Proyecto
-
-```
-usac-2025/
-├── .github/
-│   └── workflows/
-│       ├── deploy.yml              # Pipeline de despliegue a AWS
-│       └── pr-validation.yml       # Validaciones automáticas de PRs
-├── app/
-│   ├── app.py                      # Aplicación Flask
-│   ├── test_app.py                 # Tests unitarios
-│   ├── Dockerfile                  # Configuración del container
-│   └── requirements.txt            # Dependencias Python
-├── main.tf                         # Recursos principales de Terraform
-├── variables.tf                    # Variables de Terraform
-├── outputs.tf                      # Outputs de Terraform
-├── backend.tf                      # Configuración del backend de Terraform
-├── .terraform-docs.yml             # Configuración de terraform-docs
-├── TERRAFORM.md                    # Documentación auto-generada de Terraform
-├── build-and-push.sh              # Script helper para build manual
-├── GITHUB_ACTIONS_SETUP.md        # Guía de configuración de deploy
-├── PR_VALIDATION.md               # Guía de validación de PRs
-├── SOLUCION_BUILD_MULTIPLATFORM.md # Guía de arquitectura Docker
-└── README.md                       # Este archivo
-```
-
-## 🛠️ Tecnologías Utilizadas
-
-- **Infrastructure as Code**: Terraform
-- **Cloud Provider**: AWS (ECS, ECR, ALB, VPC)
-- **Containerization**: Docker
-- **Application**: Python 3.9 + Flask
-- **CI/CD**: GitHub Actions
-- **Monitoring**: AWS CloudWatch
-
-## 📊 Recursos de AWS Creados
-
-- Application Load Balancer (ALB)
-- Target Group
-- Security Groups (ALB y ECS)
-- ECS Task Definition
-- ECS Service (Fargate)
-- CloudWatch Log Group
-- IAM Role para ejecución de tareas
-
-## 🔒 Seguridad
-
-- Security Groups con reglas mínimas necesarias
-- Tareas ECS en subnets privadas
-- ALB en subnets públicas
-- Logs centralizados en CloudWatch
-- IAM Roles con permisos mínimos necesarios
-
-## 📚 Documentación Adicional
-
-- [Configuración de GitHub Actions Deploy](GITHUB_ACTIONS_SETUP.md)
-- [Validación de Pull Requests](PR_VALIDATION.md)
-- [Solución de problemas de arquitectura Docker](SOLUCION_BUILD_MULTIPLATFORM.md)
-- [Documentación de Terraform](TERRAFORM.md)
-
-## 🤝 Contribuir
-
-1. Fork el repositorio
-2. Crea una rama de feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -am 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Crea un Pull Request
-
-## 📝 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
-
-## 👨‍💻 Autor
-
-Abel Gutierrez - [@AbelGuti](https://github.com/AbelGuti)
-
-## 🙏 Agradecimientos
-
-- Universidad de San Carlos de Guatemala (USAC)
-- AWS Documentation
-- Terraform Documentation
-- GitHub Actions Documentation
