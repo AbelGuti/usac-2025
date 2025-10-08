@@ -16,36 +16,6 @@ env:
   ECS_SERVICE: usac-demo-service
 
 jobs:
-  terraform-validate:
-    name: Validate Terraform
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.5.0
-
-      - name: Terraform Format Check
-        run: terraform fmt -check
-        continue-on-error: true
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Plan
-        run: terraform plan -no-color
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest

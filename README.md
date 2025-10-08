@@ -116,12 +116,32 @@ aws ecs update-service \
 
 ## 🔄 CI/CD con GitHub Actions
 
-El proyecto incluye un pipeline CI/CD **modular** con tres jobs principales:
+El proyecto incluye **dos workflows principales** para asegurar calidad y automatizar despliegues:
 
-### En Pull Requests:
-- **terraform-validate**: Valida formato y configuración de Terraform
+### 1. Pull Request Validation (`.github/workflows/pr-validation.yml`)
 
-### En Push a main:
+Workflow profesional que se ejecuta en **cada PR** con validaciones automáticas:
+
+#### Jobs de Validación:
+- **terraform-validate**: Valida formato, sintaxis y configuración de Terraform
+- **terraform-docs**: Genera y actualiza documentación automáticamente
+- **test-flask-app**: Ejecuta tests unitarios con pytest y genera reportes de cobertura
+- **pr-validation-summary**: Consolida resultados y determina si el PR puede mergearse
+
+#### Características:
+- ✅ Bloquea merge si las validaciones fallan
+- 📝 Comenta resultados automáticamente en el PR
+- 📊 Genera reportes de cobertura de tests
+- 📚 Mantiene documentación de Terraform actualizada
+- 🔒 Integración con Branch Protection Rules
+
+Ver [PR_VALIDATION.md](PR_VALIDATION.md) para detalles completos.
+
+### 2. Deploy to AWS ECS (`.github/workflows/deploy.yml`)
+
+Pipeline de despliegue que se ejecuta **solo en push a main** (después de merge):
+
+#### Jobs de Deploy:
 1. **build-and-push**: Construye y sube imagen Docker a ECR
 2. **deploy-infrastructure**: Actualiza infraestructura con Terraform
 3. **deploy-application**: Despliega y verifica estabilidad del servicio
@@ -136,9 +156,35 @@ Ver [GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md) para configurar secretos 
 
 ### Triggers
 
-- **Push a main**: Despliegue completo
-- **Pull Request**: Solo validación de Terraform
-- **Manual**: Desde la pestaña Actions
+**PR Validation Workflow**:
+- Pull Request a `main`: Validaciones automáticas
+- Bloquea merge si falla alguna validación
+
+**Deploy Workflow**:
+- Push a `main`: Despliegue completo
+- Manual: Desde la pestaña Actions
+
+### Flujo Completo
+
+```
+Developer crea PR
+        ↓
+PR Validation ejecuta:
+  - Terraform validation ✓
+  - Generate docs ✓
+  - Run tests ✓
+        ↓
+PR es revisado y aprobado
+        ↓
+Merge a main
+        ↓
+Deploy workflow ejecuta:
+  - Build image ✓
+  - Deploy infra ✓
+  - Deploy app ✓
+        ↓
+Aplicación actualizada en producción
+```
 
 ## 🐛 Solución de Problemas
 
@@ -189,17 +235,22 @@ aws elbv2 describe-load-balancers \
 usac-2025/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml              # Pipeline modular de GitHub Actions
+│       ├── deploy.yml              # Pipeline de despliegue a AWS
+│       └── pr-validation.yml       # Validaciones automáticas de PRs
 ├── app/
 │   ├── app.py                      # Aplicación Flask
+│   ├── test_app.py                 # Tests unitarios
 │   ├── Dockerfile                  # Configuración del container
 │   └── requirements.txt            # Dependencias Python
 ├── main.tf                         # Recursos principales de Terraform
 ├── variables.tf                    # Variables de Terraform
 ├── outputs.tf                      # Outputs de Terraform
 ├── backend.tf                      # Configuración del backend de Terraform
+├── .terraform-docs.yml             # Configuración de terraform-docs
+├── TERRAFORM.md                    # Documentación auto-generada de Terraform
 ├── build-and-push.sh              # Script helper para build manual
-├── GITHUB_ACTIONS_SETUP.md        # Guía de configuración de CI/CD
+├── GITHUB_ACTIONS_SETUP.md        # Guía de configuración de deploy
+├── PR_VALIDATION.md               # Guía de validación de PRs
 ├── SOLUCION_BUILD_MULTIPLATFORM.md # Guía de arquitectura Docker
 └── README.md                       # Este archivo
 ```
@@ -233,8 +284,10 @@ usac-2025/
 
 ## 📚 Documentación Adicional
 
-- [Configuración de GitHub Actions](GITHUB_ACTIONS_SETUP.md)
+- [Configuración de GitHub Actions Deploy](GITHUB_ACTIONS_SETUP.md)
+- [Validación de Pull Requests](PR_VALIDATION.md)
 - [Solución de problemas de arquitectura Docker](SOLUCION_BUILD_MULTIPLATFORM.md)
+- [Documentación de Terraform](TERRAFORM.md)
 
 ## 🤝 Contribuir
 

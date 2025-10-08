@@ -1,0 +1,224 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  statuses: write
+
+jobs:
+  terraform-validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        continue-on-error: true
+
+      - name: Comment PR with Terraform Results
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`terraform
+            ${{ steps.plan.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Validation Status
+        if: steps.fmt.outcome == 'failure' || steps.validate.outcome == 'failure'
+        run: exit 1
+
+  terraform-docs:
+    name: Generate Terraform Documentation
+    runs-on: ubuntu-latest
+    needs: terraform-validate
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Render terraform docs
+        uses: terraform-docs/gh-actions@v1.0.0
+        with:
+          working-dir: .
+          output-file: TERRAFORM.md
+          output-method: inject
+          git-push: "true"
+          git-commit-message: "docs: update Terraform documentation"
+
+  test-flask-app:
+    name: Test Flask Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          cd app
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run Unit Tests
+        id: tests
+        run: |
+          cd app
+          python -m pytest test_app.py -v --cov=app --cov-report=term-missing --cov-report=xml
+
+      - name: Generate Test Report
+        if: always()
+        run: |
+          cd app
+          python -m pytest test_app.py -v --junit-xml=test-results.xml
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: app/test-results.xml
+          check_name: Flask Unit Tests
+
+      - name: Comment PR with Test Results
+        uses: actions/github-script@v7
+        if: always() && github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const testStatus = '${{ steps.tests.outcome }}';
+            const statusEmoji = testStatus === 'success' ? '✅' : '❌';
+            
+            const output = `### ${statusEmoji} Flask Unit Tests - \`${testStatus}\`
+            
+            Los tests unitarios de la aplicación Flask han sido ejecutados.
+            
+            - Python Version: 3.9
+            - Test Framework: pytest
+            - Coverage Report: Disponible en artifacts
+            
+            *Pusher: @${{ github.actor }}*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: app/coverage.xml
+
+  pr-validation-summary:
+    name: PR Validation Summary
+    runs-on: ubuntu-latest
+    needs: [terraform-validate, terraform-docs, test-flask-app]
+    if: always()
+    
+    steps:
+      - name: Check All Jobs Status
+        run: |
+          echo "Terraform Validate: ${{ needs.terraform-validate.result }}"
+          echo "Terraform Docs: ${{ needs.terraform-docs.result }}"
+          echo "Flask Tests: ${{ needs.test-flask-app.result }}"
+          
+          if [[ "${{ needs.terraform-validate.result }}" != "success" ]] || \
+             [[ "${{ needs.test-flask-app.result }}" != "success" ]]; then
+            echo "❌ PR validation failed"
+            exit 1
+          fi
+          
+          echo "✅ All PR validations passed"
+
+      - name: Comment Final Status
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const terraformStatus = '${{ needs.terraform-validate.result }}';
+            const docsStatus = '${{ needs.terraform-docs.result }}';
+            const testsStatus = '${{ needs.test-flask-app.result }}';
+            
+            const getEmoji = (status) => status === 'success' ? '✅' : '❌';
+            
+            const allPassed = terraformStatus === 'success' && testsStatus === 'success';
+            const finalEmoji = allPassed ? '🎉' : '⚠️';
+            
+            const output = `## ${finalEmoji} PR Validation Summary
+            
+            | Check | Status |
+            |-------|--------|
+            | Terraform Validation | ${getEmoji(terraformStatus)} ${terraformStatus} |
+            | Terraform Documentation | ${getEmoji(docsStatus)} ${docsStatus} |
+            | Flask Unit Tests | ${getEmoji(testsStatus)} ${testsStatus} |
+            
+            ${allPassed ? '### ✅ All checks passed! This PR is ready to merge.' : '### ❌ Some checks failed. Please review and fix the issues.'}
+            
+            ---
+            *Automated PR validation by GitHub Actions*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
