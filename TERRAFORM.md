@@ -1,11 +1,7 @@
 # Terraform Infrastructure Documentation
 
 <!-- BEGIN_TF_DOCS -->
-# Terraform Infrastructure Documentation
 
-
-
-## Requirements
 
 ## Requirements
 
@@ -13,13 +9,9 @@ No requirements.
 
 ## Providers
 
-## Providers
-
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
-
-## Resources
 
 ## Resources
 
@@ -38,8 +30,6 @@ No requirements.
 
 ## Inputs
 
-## Inputs
-
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_app_color"></a> [app\_color](#input\_app\_color) | El color de fondo para la aplicación Flask. | `string` | `"Red"` | no |
@@ -49,8 +39,6 @@ No requirements.
 | <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | Una lista de IDs de subredes privadas para las tareas de ECS. | `list(string)` | <pre>[<br>  "subnet-003986e9f0c9b89a1",<br>  "subnet-077449c6fb4d68931",<br>  "subnet-06f4ce867851aeb67"<br>]</pre> | no |
 | <a name="input_public_subnets"></a> [public\_subnets](#input\_public\_subnets) | Una lista de IDs de subredes públicas para el ALB. | `list(string)` | <pre>[<br>  "subnet-054f367abf11f8e44",<br>  "subnet-0e6ea13d854b28065",<br>  "subnet-0fcbfb26cae694be3"<br>]</pre> | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | El ID de la VPC existente donde se desplegarán los recursos. | `string` | `"vpc-0d0a9db77fd5f54fe"` | no |
-
-## Outputs
 
 ## Outputs
 
