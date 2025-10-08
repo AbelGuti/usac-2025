@@ -13,29 +13,17 @@ sections:
   hide: []
   show: []
 
-content: |-
-  # Terraform Infrastructure Documentation
-  
+content: |-  
   {{ .Header }}
-  
-  ## Requirements
-  
+    
   {{ .Requirements }}
-  
-  ## Providers
-  
+    
   {{ .Providers }}
-  
-  ## Resources
-  
+    
   {{ .Resources }}
-  
-  ## Inputs
-  
+    
   {{ .Inputs }}
-  
-  ## Outputs
-  
+    
   {{ .Outputs }}
 
 output:
