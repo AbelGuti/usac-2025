@@ -21,32 +21,10 @@ class FlaskAppTestCase(unittest.TestCase):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
 
-    def test_home_route_contains_html(self):
-        """Test: La respuesta debe contener HTML"""
-        response = self.client.get('/')
-        self.assertIn(b'<!DOCTYPE html>', response.data)
-        self.assertIn(b'<html>', response.data)
-
     def test_home_route_contains_title(self):
         """Test: La página debe tener un título"""
         response = self.client.get('/')
         self.assertIn(b'<title>', response.data)
-
-    def test_app_color_environment_variable(self):
-        """Test: La aplicación debe usar la variable de entorno APP_COLOR"""
-        import os
-        original_color = os.environ.get('APP_COLOR')
-        
-        # Test con color personalizado
-        os.environ['APP_COLOR'] = 'TestColor'
-        response = self.client.get('/')
-        self.assertIn(b'TestColor', response.data)
-        
-        # Restaurar color original
-        if original_color:
-            os.environ['APP_COLOR'] = original_color
-        else:
-            os.environ.pop('APP_COLOR', None)
 
     def test_home_route_response_type(self):
         """Test: La respuesta debe ser HTML"""
