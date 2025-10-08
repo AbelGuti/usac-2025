@@ -121,7 +121,7 @@ jobs:
             --query 'LoadBalancers[0].DNSName' \
             --output text)
           echo "url=http://$ALB_DNS" >> $GITHUB_OUTPUT
-          echo "🚀 Aplicación disponible en: http://$ALB_DNS"
+          echo "Aplicación disponible en: http://$ALB_DNS"
 
       - name: Deployment Summary
         run: |
