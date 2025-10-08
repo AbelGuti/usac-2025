@@ -125,7 +125,7 @@ jobs:
 
       - name: Deployment Summary
         run: |
-          echo "## ✅ Despliegue Completado" >> $GITHUB_STEP_SUMMARY
+          echo "## Despliegue Completado" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Detalles del Despliegue" >> $GITHUB_STEP_SUMMARY
           echo "- **Imagen:** \`${{ needs.build-and-push.outputs.image }}\`" >> $GITHUB_STEP_SUMMARY
@@ -133,5 +133,5 @@ jobs:
           echo "- **Cluster:** \`${{ env.ECS_CLUSTER }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Servicio:** \`${{ env.ECS_SERVICE }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🌐 Acceso a la Aplicación" >> $GITHUB_STEP_SUMMARY
+          echo "### Acceso a la Aplicación" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** ${{ steps.get-url.outputs.url }}" >> $GITHUB_STEP_SUMMARY
