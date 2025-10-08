@@ -113,13 +113,13 @@ resource "aws_lb_listener" "http" {
 
 # Rol de IAM que ECS asume para ejecutar las tareas
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "ecs_task_execution_role_usac_demo"
+  name = "ecs_task_execution_role_usac_demo"
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17",
+    Version = "2012-10-17",
     Statement = [
       {
-        Action    = "sts:AssumeRole",
-        Effect    = "Allow",
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
         Principal = {
           Service = "ecs-tasks.amazonaws.com"
         }
@@ -142,8 +142,8 @@ resource "aws_ecs_task_definition" "main" {
   family                   = "usac-demo-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"  # 0.25 vCPU
-  memory                   = "512"  # 512 MB
+  cpu                      = "256" # 0.25 vCPU
+  memory                   = "512" # 512 MB
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
   container_definitions = jsonencode([
@@ -193,8 +193,8 @@ resource "aws_ecs_service" "main" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = var.private_subnets
-    security_groups = [aws_security_group.ecs_service_sg.id]
+    subnets          = var.private_subnets
+    security_groups  = [aws_security_group.ecs_service_sg.id]
     assign_public_ip = false
   }
 

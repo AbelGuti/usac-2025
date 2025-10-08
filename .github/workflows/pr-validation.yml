@@ -131,13 +131,6 @@ jobs:
           cd app
           python -m pytest test_app.py -v --junit-xml=test-results.xml
 
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: app/test-results.xml
-          check_name: Flask Unit Tests
-
       - name: Comment PR with Test Results
         uses: actions/github-script@v7
         if: always() && github.event_name == 'pull_request'
