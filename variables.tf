@@ -25,7 +25,7 @@ variable "docker_image" {
 variable "app_color" {
   description = "El color de fondo para la aplicación Flask."
   type        = string
-  default     = "Red"
+  default     = "Blue"
 }
 
 variable "public_subnets" {

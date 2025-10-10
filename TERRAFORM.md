@@ -32,7 +32,7 @@ No requirements.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_app_color"></a> [app\_color](#input\_app\_color) | El color de fondo para la aplicación Flask. | `string` | `"Red"` | no |
+| <a name="input_app_color"></a> [app\_color](#input\_app\_color) | El color de fondo para la aplicación Flask. | `string` | `"Blue"` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | La región de AWS donde se desplegarán los recursos. | `string` | `"us-east-1"` | no |
 | <a name="input_docker_image"></a> [docker\_image](#input\_docker\_image) | La URL completa de la imagen de Docker a desplegar (ej. en ECR). | `string` | `"737584674007.dkr.ecr.us-east-1.amazonaws.com/usac-2025:latest"` | no |
 | <a name="input_ecs_cluster_name"></a> [ecs\_cluster\_name](#input\_ecs\_cluster\_name) | El nombre del clúster de ECS existente. | `string` | `"USAC-2025"` | no |
